@@ -1,0 +1,23 @@
+{% extends 'users/base.html' %}
+
+{% block title %}
+    Registration | MyWebMessenger
+{% endblock %}
+
+{% block header %}
+    REGISTRATION
+{% endblock %}
+
+
+{% block content %}
+    <form method="post">
+
+        {{form.as_p}}
+        {% csrf_token %}
+        <div class="d-grid gap-2 col-8 mx-auto">
+          <button type="submit" class="btn btn-dark">Sign Up</button>
+          <a class="btn btn-outline-dark" href="{% url 'login' %}" role="button">Sign In</a>
+        </div>
+    </form>
+    </div>
+{% endblock %}

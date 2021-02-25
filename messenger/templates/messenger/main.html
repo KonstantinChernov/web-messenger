@@ -1,0 +1,106 @@
+{% extends 'messenger/base.html' %}
+
+
+
+{% block title %}
+    My Dialogues | MyWebMessenger
+{% endblock %}
+
+
+{% block content %}
+{% if not chats %}
+
+<div class="text-muted text-center m-5" id="patch">Search for the interlocutors</div>
+
+{% else %}
+
+<div class="container">
+    <div class="list-group list-group-flush">
+
+            {% for chat in chats %}
+
+              <a href="{% url 'chat' chat.interlocutor %}"
+                 class="list-group-item list-group-item-action chat"><b>{{ chat.interlocutor }}</b>
+                {% if chat.unread_messages_count > 0 and chat.last_message_author.username != request.user.username %}
+                          <span class="badge rounded-pill bg-warning text-dark m-1">
+                              {{ chat.unread_messages_count }}</span>
+                {% endif %}
+
+
+                  <button type="button" class="btn-close float-end m-0 delChatBtn"></button>
+                  <div class="alert {% if chat.unread_messages_count > 0 and chat.last_message_author.username != request.user.username %}
+                                        alert-warning
+                                    {% elif chat.unread_messages_count > 0 and chat.last_message_author.username == request.user.username%}
+                                        alert-secondary border-0
+                                    {% endif %} p-2 mb-1">
+                      <span>
+                      {% if chat.last_message_author.username == request.user.username %}
+
+                        <i>You:</i> {{ chat.last_message }}
+
+                      {% else %}
+
+                        {{ chat.last_message }}
+
+                      {% endif %}
+                      </span>
+                      <span class="float-end" style="font-size: 10pt;">
+                          {{ chat.last_message_timestamp|time:"H:i:s" }} {{ chat.last_message_timestamp|date:"D M d Y" }}
+                      </span>
+
+                  </div>
+              </a>
+
+            {% endfor %}
+
+    </div>
+</div>
+{% endif %}
+
+
+
+<div class="modal fade" id="deleteWarningModal" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="staticBackdropLabel">Confirmation</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+      </div>
+      <div class="modal-footer">
+        <a type="button" class="btn btn-danger delete-button">Delete</a>
+        <a type="button" class="btn btn btn-dark" data-bs-dismiss="modal">Cancel</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block script %}
+<script>
+    const chats = document.querySelectorAll('.chat');
+    const deleteWarningModalBS = new bootstrap.Modal(document.querySelector('#deleteWarningModal'));
+
+    chats.forEach(item => {
+        item.addEventListener('click', e => {
+            if (e.target.matches('.delChatBtn')) {
+                e.preventDefault();
+
+                const modalBody = deleteWarningModal.querySelector('.modal-body');
+                const deleteBtn = deleteWarningModal.querySelector('.delete-button');
+
+
+                const interlocutor = item.querySelector('b').textContent;
+
+                modalBody.innerHTML = `Are you sure you want to delete the conversation with <b>${interlocutor}</b>?`;
+                deleteBtn.href = `delete/${interlocutor}/`;
+
+                deleteWarningModalBS.show();
+            }
+        });
+    });
+</script>
+
+{% endblock %}

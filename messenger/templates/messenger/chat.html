@@ -1,0 +1,160 @@
+{% extends 'messenger/base.html' %}
+{% block title %}
+    Name of Interlocutor | MyWebMessenger
+{% endblock %}
+
+{% block content %}
+
+
+        <div class="container bg-dark bg-gradient pb-5 pt-2 overflow-hidden shadow-lg flex-grow-1">
+            <div class="text-center text-warning">{{ interlocutor }}</div>
+            <div class="bg-light bg-gradient rounded-3 mt-3 overflow-auto mh-100 d-flex flex-column h-100 w-100"
+                 id="chat-window">
+                {% if messages %}
+                {% for message in messages %}
+                {% if message.author.username == request.user.username %}
+                <div class="ps-5">
+                    <div class="shadow p-2 text-break
+                                rounded-3 overflow-auto
+                                mw-100 text-wrap
+                                m-1 border
+                                float-end bg-secondary
+                                bg-gradient text-white">
+                    {{ message.message }}
+                    <div class="text-end" style="font-size: 9pt;">{{ message.pub_date|time:"H:i:s" }}
+                       {{ message.pub_date|date:"D M d Y" }}</div>
+                    </div>
+                </div>
+                {% else %}
+                <div class="pe-5">
+                    <div class="shadow p-2 text-break
+                                rounded-3 overflow-auto
+                                mw-100 text-wrap
+                                m-1 border
+                                float-start justify-content-start bg-light">
+                    {{ message.message }}
+                    <div class="text-end" style="font-size: 9pt;">{{ message.pub_date|time:"H:i:s" }}
+                       {{ message.pub_date|date:"D M d Y" }}</div>
+                    </div>
+                </div>
+                {% endif %}
+                {% endfor %}
+
+                {% else %}
+                <div class="text-muted text-center m-5" id="patch">You can start the conversation</div>
+                {% endif %}
+
+            </div>
+        </div>
+
+        <div class="container bg-dark bg-gradient p-3 shadow-lg">
+            <form class="d-flex w-100" method="post">
+                {% csrf_token %}
+
+                 <input class="d-flex w-100" name="chat-message" id="chat-message-input"
+                        type="text" placeholder="">
+
+                 <input class="btn btn-outline-light ms-2" id="chat-message-submit"
+                        type="button" value="Send"/>
+
+            </form>
+        </div>
+
+{% endblock %}
+
+{% block script %}
+
+    <script>
+        document.body.style.overflow = "hidden";
+        const chatId = "{{ chat_id|escapejs }}";
+        const messageInput = document.querySelector('#chat-message-input');
+        const sendButton = document.querySelector('#chat-message-submit');
+        const chatWindow = document.querySelector('#chat-window');
+
+        chatWindow.scrollTo(0, chatWindow.scrollHeight);
+
+        function showMessage(user, message, timestamp) {
+            if (message.trim()) {
+            const wrapperDiv = document.createElement('div');
+            const messageDiv = document.createElement('div');
+            messageDiv.classList.add("shadow",
+                                     "p-2",
+                                     "text-break",
+                                     "rounded-3",
+                                     "overflow-auto",
+                                     "mw-100",
+                                     "text-wrap",
+                                     "m-1",
+                                     "border");
+            if (user == '{{ request.user.username }}') {
+                messageDiv.classList.add("float-end", "bg-secondary", "bg-gradient", "text-white");
+                wrapperDiv.classList.add('ps-5');
+            } else {
+                messageDiv.classList.add("float-start", "justify-content-start", "bg-light");
+                wrapperDiv.classList.add('pe-5');
+            }
+            messageDiv.innerText = message;
+
+            const timestampDiv = document.createElement('div');
+            timestampDiv.classList.add("text-end");
+            timestampDiv.style.fontSize = "9pt";
+            timestampDiv.innerText = timestamp.toLocaleTimeString() + " " + timestamp.toDateString();
+
+            messageDiv.append(timestampDiv);
+            wrapperDiv.append(messageDiv);
+            chatWindow.append(wrapperDiv);
+            chatWindow.scrollTo(0, chatWindow.scrollHeight);
+            }
+        }
+
+        const chatSocket = new WebSocket(
+            'ws://' + window.location.host +
+            '/ws/chat/' + chatId + '/');
+
+
+        chatSocket.addEventListener('message', (e) => {
+            const data = JSON.parse(e.data);
+            const message = data['message'];
+            const user = data['user'];
+            const timestamp = new Date(data['timestamp']);
+            console.log(timestamp.getTimezoneOffset());
+            if (timestamp.getTimezoneOffset()) timestamp.setHours(timestamp.getHours()-3);
+
+
+            if (document.querySelector('#patch')) document.querySelector('#patch').remove();
+            showMessage(user, message, timestamp);
+
+
+        });
+
+        chatSocket.addEventListener('close', (e) => {
+            console.error('Chat socket closed unexpectedly');
+        });
+
+        messageInput.focus();
+        messageInput.addEventListener('keydown', (e) => {
+                if (e.code === "Enter") {
+                e.preventDefault();
+                sendButton.click();
+            }
+
+        });
+
+        sendButton.addEventListener('click', (e) => {
+            const message = messageInput.value;
+            if (message.trim()) {
+                chatSocket.send(JSON.stringify({
+                    'message': message,
+                    'user': "{{ request.user }}",
+                    'chat_id': '{{ chat_id }}',
+                }));
+            }
+
+            messageInput.value = '';
+        });
+
+
+    </script>
+
+{% endblock %}
+
