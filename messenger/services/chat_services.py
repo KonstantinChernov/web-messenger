@@ -56,6 +56,21 @@ def save_message_to_db_get_message_dict(json_message):
     }
 
 
+def get_10_elder_messages(username, interlocutor, timestamp):
+    chat = get_dialogue_chat(username, interlocutor)
+    messages = Message.objects.filter(chat=chat).order_by('-pub_date').filter(pub_date__lt=timestamp)[:10]
+    package_of_messages = []
+    for message in messages:
+        message_obj = {
+            'user': message.author.username,
+            'message': message.message,
+            'timestamp': str(message.pub_date)
+        }
+        package_of_messages.append(message_obj)
+
+    return package_of_messages
+
+
 def get_count_of_unread_messages(chat):
     return Message.objects.filter(chat=chat).filter(is_read=False).count()
 
@@ -68,7 +83,8 @@ def get_messages_and_mark_them_read(username, chat):
             message.is_read = True
             message.save()
     if count_of_unread > 15:
-        return reversed(messages[:count_of_unread + 1])
+        # return reversed(messages[:count_of_unread + 1])
+        return reversed(messages[:15])
     else:
         return reversed(messages[:15])
 

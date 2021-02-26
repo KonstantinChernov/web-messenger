@@ -24,6 +24,7 @@
                     <div class="text-end" style="font-size: 9pt;">{{ message.pub_date|time:"H:i:s" }}
                        {{ message.pub_date|date:"D M d Y" }}</div>
                     </div>
+                    <span class="timestamp" style="display: None;">{{message.pub_date|date:"c" }}</span>
                 </div>
                 {% else %}
                 <div class="pe-5">
@@ -36,6 +37,7 @@
                     <div class="text-end" style="font-size: 9pt;">{{ message.pub_date|time:"H:i:s" }}
                        {{ message.pub_date|date:"D M d Y" }}</div>
                     </div>
+                    <span class="timestamp" style="display: None;">{{message.pub_date|date:"c" }}</span>
                 </div>
                 {% endif %}
                 {% endfor %}
@@ -73,7 +75,41 @@
 
         chatWindow.scrollTo(0, chatWindow.scrollHeight);
 
-        function showMessage(user, message, timestamp) {
+
+        const fetchElderMessages = async function() {
+            if (chatWindow.scrollHeight >= chatWindow.clientHeight && chatWindow.scrollTop === 0) {
+                const date = document.querySelector('.timestamp').textContent;
+                let data = new FormData();
+                data.append('date', date);
+                data.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+                const res = await fetch("", {
+                    method: 'POST',
+                    body: data,
+                    headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                    }
+                });
+                if (res.status == "200") {
+                    data = await res.json();
+                    elderMessagesPack = document.createElement('div');
+                    elderMessagesPack.className = `d-flex flex-column h-100 w-100 mb-3`;
+                    data.messages.forEach(elem => {
+                        const elderMessage = createMessageElement(elem.user, elem.message, elem.timestamp);
+                        elderMessagesPack.prepend(elderMessage);
+                    });
+                    chatWindow.prepend(elderMessagesPack);
+                    chatWindow.scrollTop = elderMessagesPack.clientHeight;
+                } else chatWindow.removeEventListener('scroll', fetchElderMessages);
+            }
+        }
+
+        chatWindow.addEventListener('scroll', fetchElderMessages);
+
+
+
+        function createMessageElement(user, message, timestamp) {
+
+            const timeStampDateFormat = new Date(timestamp)
             if (message.trim()) {
             const wrapperDiv = document.createElement('div');
             const messageDiv = document.createElement('div');
@@ -98,19 +134,21 @@
             const timestampDiv = document.createElement('div');
             timestampDiv.classList.add("text-end");
             timestampDiv.style.fontSize = "9pt";
-            timestampDiv.innerText = timestamp.toLocaleTimeString() + " " + timestamp.toDateString();
+            timestampDiv.innerText = timeStampDateFormat.toLocaleTimeString() + " " + timeStampDateFormat.toDateString();
 
+            const timestampHidden = document.createElement('div');
+            timestampHidden.classList.add("timestamp");
+            timestampHidden.innerText = timestamp;
+            timestampHidden.style.display = 'None';
+
+            messageDiv.append(timestampHidden);
             messageDiv.append(timestampDiv);
             wrapperDiv.append(messageDiv);
-            chatWindow.append(wrapperDiv);
-            chatWindow.scrollTo(0, chatWindow.scrollHeight);
+            return wrapperDiv
             }
         }
 
-        const chatSocket = new WebSocket(
-            'ws://' + window.location.host +
-            '/ws/chat/' + chatId + '/');
-
+        const chatSocket = new WebSocket('ws://' + window.location.host + '/ws/chat/' + chatId + '/');
 
         chatSocket.addEventListener('message', (e) => {
             const data = JSON.parse(e.data);
@@ -123,7 +161,10 @@
             }
 
             if (document.querySelector('#patch')) document.querySelector('#patch').remove();
-            showMessage(user, message, timestamp);
+            const newMessageElement = createMessageElement(user, message, timestamp);
+            chatWindow.append(newMessageElement);
+            chatWindow.scrollTo(0, chatWindow.scrollHeight);
+
 
 
         });
