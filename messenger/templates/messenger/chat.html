@@ -117,9 +117,10 @@
             const message = data['message'];
             const user = data['user'];
             const timestamp = new Date(data['timestamp']);
-            console.log(timestamp.getTimezoneOffset());
-            if (timestamp.getTimezoneOffset()) timestamp.setHours(timestamp.getHours()-3);
 
+            if (timestamp.getTimezoneOffset()) {
+                timestamp.setHours(timestamp.getHours() + timestamp.getTimezoneOffset()/60);
+            }
 
             if (document.querySelector('#patch')) document.querySelector('#patch').remove();
             showMessage(user, message, timestamp);

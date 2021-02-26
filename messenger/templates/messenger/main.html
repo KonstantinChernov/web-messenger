@@ -94,7 +94,8 @@
 
                 const interlocutor = item.querySelector('b').textContent;
 
-                modalBody.innerHTML = `Are you sure you want to delete the conversation with <b>${interlocutor}</b>?`;
+                modalBody.innerHTML = `Are you sure you want to delete the conversation with <b>${interlocutor}</b>?
+                <br> This user will lose it too`;
                 deleteBtn.href = `delete/${interlocutor}/`;
 
                 deleteWarningModalBS.show();
