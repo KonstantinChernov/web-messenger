@@ -3,7 +3,7 @@ from channels.generic.websocket import WebsocketConsumer
 import json
 
 from django.contrib.auth.models import User
-from .services.chat_services import save_message_to_db_get_message_dict
+from .services.chat_services import save_message_to_db_get_message_dict, update_message_read
 from .models import Message, Chat
 
 
@@ -45,7 +45,7 @@ class ChatConsumer(WebsocketConsumer):
         message_id = event['message_id']
 
         if str(self.scope['user']) != user:
-            Message.objects.filter(pk=message_id).update(is_read=True)
+            update_message_read(message_id)
 
         # Send message to WebSocket
         self.send(text_data=json.dumps({

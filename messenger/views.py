@@ -14,7 +14,7 @@ class MainView(LoginRequiredMixin, View):
         chats = get_all_chats(request.user.username)
         return render(request, 'messenger/main.html', {'chats': chats})
 
-    def post(self, request, interlocutor=None):
+    def post(self, request):
         interlocutor = request.POST.get('interlocutor_username')
         if interlocutor_exists(interlocutor):
             return JsonResponse({'interlocutor_username': interlocutor}, status=200)
@@ -22,7 +22,9 @@ class MainView(LoginRequiredMixin, View):
             return JsonResponse({'interlocutor_username': None}, status=404)
 
 
-class ChatView(MainView):
+class ChatView(LoginRequiredMixin, View):
+    login_url = 'login'
+
     def get(self, request, interlocutor=None):
         chat = get_dialogue_chat(request.user.username, interlocutor)
         messages = get_messages_and_mark_them_read(request.user.username, chat.id)
@@ -31,15 +33,15 @@ class ChatView(MainView):
                                                        'interlocutor': interlocutor})
 
     def post(self, request, interlocutor=None):
-        if request.is_ajax():
-            datestamp = request.POST['date']
+        if request.POST.get('date'):
+            datestamp = request.POST.get('date')
             messages = get_10_elder_messages(request.user.username, interlocutor, datestamp)
             if messages:
                 return JsonResponse({'messages': messages}, status=200)
             else:
                 return JsonResponse({'messages': None}, status=204)
 
-        else:
+        elif request.POST.get('interlocutor_username'):
             new_interlocutor = request.POST.get('interlocutor_username')
             if interlocutor_exists(new_interlocutor):
                 return JsonResponse({'interlocutor_username': new_interlocutor}, status=200)

@@ -5,7 +5,7 @@ from ..models import Chat, Message
 def interlocutor_exists(username: str):
     """
     The function defines if username is in database
-    :param username: username
+    :param username: username of user
     :return: boolean
     """
     return User.objects.filter(username=username).exists()
@@ -13,10 +13,10 @@ def interlocutor_exists(username: str):
 
 def get_dialogue_chat(username: str, interlocutor: str):
     """
-    The function
-    :param username:
-    :param interlocutor:
-    :return:
+    The function finds the dialogue which is common for username and interlocutor or creates new one
+    :param username: username of user
+    :param interlocutor: username of interlocutor
+    :return: Chat instance
     """
     user = User.objects.get(username=username)
     interlocutor_user = User.objects.get(username=interlocutor)
@@ -34,10 +34,19 @@ def get_dialogue_chat(username: str, interlocutor: str):
 
 
 def delete_dialogue_chat(username: str, interlocutor: str):
+    """
+    The function finds the dialogue which is common for username and interlocutor and removes it from db
+    :param username: username of user
+    :param interlocutor: username of interlocutor
+    """
     get_dialogue_chat(username, interlocutor).delete()
 
 
 def save_message_to_db_get_message_dict(json_message):
+    """
+    The function for consumer. It takes json message from client, saves it to db and returns massage
+    as data from db with timestamp as a dict. This data then sends like message to the group by websocket
+    """
     message = json_message['message']
     user = json_message['user']
     chat = json_message['chat_id']
@@ -56,7 +65,11 @@ def save_message_to_db_get_message_dict(json_message):
     }
 
 
-def get_10_elder_messages(username, interlocutor, timestamp):
+def get_10_elder_messages(username: str, interlocutor: str, timestamp):
+    """
+    This function
+
+    """
     chat = get_dialogue_chat(username, interlocutor)
     messages = Message.objects.filter(chat=chat).order_by('-pub_date').filter(pub_date__lt=timestamp)[:10]
     package_of_messages = []
@@ -67,7 +80,6 @@ def get_10_elder_messages(username, interlocutor, timestamp):
             'timestamp': str(message.pub_date)
         }
         package_of_messages.append(message_obj)
-
     return package_of_messages
 
 
@@ -82,11 +94,11 @@ def get_messages_and_mark_them_read(username, chat):
         if message.author.username != username and not message.is_read:
             message.is_read = True
             message.save()
-    if count_of_unread > 15:
-        # return reversed(messages[:count_of_unread + 1])
-        return reversed(messages[:15])
-    else:
-        return reversed(messages[:15])
+    return reversed(messages[:15])
+
+
+def update_message_read(message_id):
+    Message.objects.filter(pk=message_id).update(is_read=True)
 
 
 def get_all_chats(username):

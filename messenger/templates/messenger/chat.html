@@ -85,14 +85,11 @@
                 const res = await fetch("", {
                     method: 'POST',
                     body: data,
-                    headers: {
-                    'X-Requested-With': 'XMLHttpRequest'
-                    }
                 });
                 if (res.status == "200") {
                     data = await res.json();
                     elderMessagesPack = document.createElement('div');
-                    elderMessagesPack.className = `d-flex flex-column h-100 w-100 mb-3`;
+                    elderMessagesPack.className = `d-flex flex-column w-100`;
                     data.messages.forEach(elem => {
                         const elderMessage = createMessageElement(elem.user, elem.message, elem.timestamp);
                         elderMessagesPack.prepend(elderMessage);
@@ -104,8 +101,6 @@
         }
 
         chatWindow.addEventListener('scroll', fetchElderMessages);
-
-
 
         function createMessageElement(user, message, timestamp) {
 
@@ -164,9 +159,6 @@
             const newMessageElement = createMessageElement(user, message, timestamp);
             chatWindow.append(newMessageElement);
             chatWindow.scrollTo(0, chatWindow.scrollHeight);
-
-
-
         });
 
         chatSocket.addEventListener('close', (e) => {
@@ -179,7 +171,6 @@
                 e.preventDefault();
                 sendButton.click();
             }
-
         });
 
         sendButton.addEventListener('click', (e) => {
@@ -191,7 +182,6 @@
                     'chat_id': '{{ chat_id }}',
                 }));
             }
-
             messageInput.value = '';
         });
 
