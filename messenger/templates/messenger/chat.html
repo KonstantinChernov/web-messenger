@@ -75,7 +75,6 @@
 
         chatWindow.scrollTo(0, chatWindow.scrollHeight);
 
-
         const fetchElderMessages = async function() {
             if (chatWindow.scrollHeight >= chatWindow.clientHeight && chatWindow.scrollTop === 0) {
                 const date = document.querySelector('.timestamp').textContent;
@@ -103,7 +102,6 @@
         chatWindow.addEventListener('scroll', fetchElderMessages);
 
         function createMessageElement(user, message, timestamp) {
-
             const timeStampDateFormat = new Date(timestamp)
             if (message.trim()) {
             const wrapperDiv = document.createElement('div');
@@ -178,7 +176,7 @@
             if (message.trim()) {
                 chatSocket.send(JSON.stringify({
                     'message': message,
-                    'user': "{{ request.user }}",
+                    'user': '{{ request.user }}',
                     'chat_id': '{{ chat_id }}',
                 }));
             }

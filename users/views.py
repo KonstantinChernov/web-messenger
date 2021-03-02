@@ -1,8 +1,9 @@
 from django.contrib.auth import login
 from django.shortcuts import render, redirect
 from django.views import View
-from .forms import UserRegisterForm, UserLoginForm
 from django.contrib import messages
+
+from .forms import UserRegisterForm, UserLoginForm
 
 
 class Register(View):

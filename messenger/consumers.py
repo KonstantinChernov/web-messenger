@@ -1,10 +1,10 @@
-from asgiref.sync import async_to_sync
-from channels.generic.websocket import WebsocketConsumer
 import json
 
-from django.contrib.auth.models import User
-from .services.chat_services import save_message_to_db_get_message_dict, update_message_read
-from .models import Message, Chat
+from asgiref.sync import async_to_sync
+from channels.generic.websocket import WebsocketConsumer
+
+from .services.chat_services import save_message_to_db_get_message_dict, update_message_read, \
+    check_if_dialogue_is_empty_then_delete
 
 
 class ChatConsumer(WebsocketConsumer):
@@ -22,6 +22,8 @@ class ChatConsumer(WebsocketConsumer):
 
     def disconnect(self, close_code):
         # Leave room group
+        check_if_dialogue_is_empty_then_delete(self.room_name)
+
         async_to_sync(self.channel_layer.group_discard)(
             self.room_group_name,
             self.channel_name

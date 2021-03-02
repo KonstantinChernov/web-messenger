@@ -1,7 +1,6 @@
 {% extends 'messenger/base.html' %}
 
 
-
 {% block title %}
     My Dialogues | MyWebMessenger
 {% endblock %}
@@ -32,7 +31,7 @@
                                         alert-warning
                                     {% elif chat.unread_messages_count > 0 and chat.last_message_author.username == request.user.username%}
                                         alert-secondary border-0
-                                    {% endif %} p-2 mb-1">
+                                    {% endif %} p-2 mb-1 text-truncate">
                       <span>
                       {% if chat.last_message_author.username == request.user.username %}
 
@@ -91,7 +90,6 @@
                 const modalBody = deleteWarningModal.querySelector('.modal-body');
                 const deleteBtn = deleteWarningModal.querySelector('.delete-button');
 
-
                 const interlocutor = item.querySelector('b').textContent;
 
                 modalBody.innerHTML = `Are you sure you want to delete the conversation with <b>${interlocutor}</b>?
@@ -102,6 +100,8 @@
             }
         });
     });
+
+    setInterval(() => location.reload(), 10000);
 </script>
 
 {% endblock %}

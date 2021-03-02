@@ -4,21 +4,21 @@ from django.utils.timezone import now
 
 
 class Chat(models.Model):
-    DIALOG = 'D'
-    CHAT = 'C'
-    CHAT_TYPE_CHOICES = (
-        (DIALOG, 'dialog'),
-        (CHAT, 'chat')
-    )
 
-    type = models.CharField(
+    class ChatType(models.TextChoices):
+        DIALOG = 'D', 'dialogue'
+        CHAT = 'C', 'common'
+
+    chat_type = models.CharField(
         'type',
         max_length=1,
-        choices=CHAT_TYPE_CHOICES,
-        default=DIALOG,
-
+        choices=ChatType.choices,
+        default=ChatType.DIALOG,
     )
     member = models.ManyToManyField(User, verbose_name='member')
+
+    def __str__(self):
+        return f'{self.pk}'
 
 
 class Message(models.Model):
