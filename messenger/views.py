@@ -3,8 +3,12 @@ from django.shortcuts import render, redirect
 from django.views import View
 from django.contrib.auth.mixins import LoginRequiredMixin
 
-from .services.chat_services import interlocutor_exists, get_messages_and_mark_them_read, get_all_chats, \
-    get_dialogue_chat, delete_dialogue_chat, get_10_elder_messages
+from .services.chat_services import (interlocutor_exists,
+                                     get_messages_and_mark_them_read,
+                                     get_all_chats,
+                                     get_dialogue_chat,
+                                     delete_dialogue_chat,
+                                     get_10_elder_messages)
 
 
 class MainView(LoginRequiredMixin, View):

@@ -10,10 +10,15 @@ class UserListSerializer(serializers.ModelSerializer):
         fields = ('username', 'email')
 
 
-class UserSerializer(serializers.ModelSerializer):
+class UserRegisterSerializer(serializers.ModelSerializer):
+    password1 = serializers.CharField(style={"input_type": "password"}, required=True)
+    password2 = serializers.CharField(style={"input_type": "password"}, required=True)
+
     class Meta:
         model = User
-        fields = ('username', 'email', 'password')
+        fields = ('username', 'email', 'password1', 'password2')
+        extra_kwargs = {'password1': {'write_only': True},
+                        'password2': {'write_only': True}}
 
 
 class ChatSerializer(serializers.ModelSerializer):
@@ -24,7 +29,18 @@ class ChatSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
+class ChatCreateSerializer(serializers.ModelSerializer):
+    member = serializers.CharField(required=True)
+
+    class Meta:
+        model = Chat
+        fields = ('member', 'chat_type')
+
+
 class MessageSerializer(serializers.ModelSerializer):
+    author = serializers.StringRelatedField()
+    chat = ChatSerializer()
+
     class Meta:
         model = Message
         fields = '__all__'
@@ -35,13 +51,13 @@ class MessageListSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Message
-        fields = '__all__'
+        exclude = ('chat',)
 
 
-class ChatMessagesListSerializer(serializers.ModelSerializer):
-    chat_messages = MessageListSerializer(many=True)
-    member = serializers.StringRelatedField(many=True)
+class MessageCreateSerializer(serializers.ModelSerializer):
+    chat_id = serializers.IntegerField(required=True)
+    message = serializers.CharField(required=True)
 
     class Meta:
-        model = Chat
-        fields = ('id', 'member', 'chat_messages')
+        model = Message
+        fields = ('chat_id', 'message')

@@ -1,18 +1,20 @@
 from django.urls import path
 from rest_framework import routers
+from rest_framework.authtoken import views
+
 from .yasg import schema_view
 
-from .views import UserViewSet, UserDialoguesAPIView, DialogueViewSet, MessageViewSet
-
+from .views import UsersViewSet, ChatsViewSet, MessageViewSet, UserRegisterAPIView, UserAuthTokenLogin
 
 router = routers.SimpleRouter()
-router.register(r'users', UserViewSet, basename='user')
-router.register(r'dialogues', DialogueViewSet, basename='dialogue')
+router.register(r'users', UsersViewSet, basename='user')
+router.register(r'chats', ChatsViewSet, basename='chat')
 router.register(r'message', MessageViewSet, basename='message')
 
 urlpatterns = [
     path('', schema_view.with_ui('swagger')),
-    path('users/<str:username>/dialogues', UserDialoguesAPIView.as_view()),
+    path('register/', UserRegisterAPIView.as_view(), name='api_register'),
+    path('login/', UserAuthTokenLogin.as_view(), name='api_login'),
 ]
 
 urlpatterns += router.urls
