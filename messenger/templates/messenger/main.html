@@ -35,11 +35,11 @@
                       <span>
                       {% if chat.last_message_author.username == request.user.username %}
 
-                        <i>You:</i> {{ chat.last_message }}
+                        <i>You:</i> {{ chat.last_message.message }}
 
                       {% else %}
 
-                        {{ chat.last_message }}
+                        {{ chat.last_message.message }}
 
                       {% endif %}
                       </span>

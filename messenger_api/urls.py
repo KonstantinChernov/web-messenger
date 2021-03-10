@@ -1,6 +1,6 @@
 from django.urls import path
 from rest_framework import routers
-from rest_framework.authtoken import views
+
 
 from .yasg import schema_view
 

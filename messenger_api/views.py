@@ -1,4 +1,5 @@
 from django.contrib.auth.models import User
+from django.core.exceptions import ObjectDoesNotExist
 from rest_framework.authtoken.models import Token
 from rest_framework import mixins, viewsets, status
 from rest_framework.authtoken.serializers import AuthTokenSerializer
@@ -9,10 +10,10 @@ from rest_framework.response import Response
 
 from .serializers import (UserListSerializer,
                           UserRegisterSerializer,
-                          ChatSerializer,
                           MessageSerializer,
                           MessageListSerializer,
                           MessageCreateSerializer,
+                          ChatSerializer,
                           ChatCreateSerializer)
 from users.forms import UserRegisterForm
 from messenger.models import Chat, Message
@@ -46,7 +47,7 @@ class UserRegisterAPIView(CreateAPIView):
 
 class UserAuthTokenLogin(CreateAPIView):
     """
-    Token Authorisation API
+    Token Authorisation API (Login)
     """
     serializer_class = AuthTokenSerializer
 
@@ -121,7 +122,7 @@ class ChatsViewSet(mixins.CreateModelMixin,
                     request.user.chat_set.add(new_dialogue_chat)
                     interlocutor.chat_set.add(new_dialogue_chat)
                     return Response({'success': 'chat created successfully'})
-            except User.DoesNotExists:
+            except ObjectDoesNotExist:
                 return Response({"error": "user is not found"}, status=status.HTTP_404_NOT_FOUND)
         else:
             return Response(serializer.errors)
@@ -144,7 +145,7 @@ class ChatsViewSet(mixins.CreateModelMixin,
                 return self.get_paginated_response(page)
             else:
                 return Response({"error": "HTTP 403 Permission Denied"}, status=status.HTTP_403_FORBIDDEN)
-        except Chat.DoesNotExist:
+        except ObjectDoesNotExist:
             return Response({"error": "chat is not found"}, status=status.HTTP_404_NOT_FOUND)
 
     def destroy(self, request, *args, **kwargs):
@@ -153,10 +154,10 @@ class ChatsViewSet(mixins.CreateModelMixin,
             chat = Chat.objects.get(pk=pk)
             if chat in request.user.chat_set.all():
                 chat.delete()
-                return Response({"success": "chat deleted"})
+                return Response({"success": "chat deleted"}, status=status.HTTP_204_NO_CONTENT)
             else:
                 return Response({"error": "HTTP 403 Permission Denied"}, status=status.HTTP_403_FORBIDDEN)
-        except Chat.DoesNotExist:
+        except ObjectDoesNotExist:
             return Response({"error": "message is not found"}, status=status.HTTP_404_NOT_FOUND)
 
 
@@ -183,25 +184,28 @@ class MessageViewSet(mixins.CreateModelMixin,
                 return Response(serializer.data)
             else:
                 return Response({"error": "HTTP 403 Permission Denied"}, status=status.HTTP_403_FORBIDDEN)
-        except Message.DoesNotExist:
+        except ObjectDoesNotExist:
             return Response({"error": "message is not found"}, status=status.HTTP_404_NOT_FOUND)
 
     def create(self, request, *args, **kwargs):
-        serializer = MessageCreateSerializer(data=request.data)
-        if serializer.is_valid():
-            chat_id = serializer.validated_data['chat_id']
-            message = serializer.validated_data['message']
-            try:
-                chat = Chat.objects.get(pk=chat_id)
-                if chat in request.user.chat_set.all():
-                    Message.objects.create(author=request.user, chat=chat, message=message)
-                    return Response({"success": "message created"}, status=status.HTTP_201_CREATED)
-                else:
-                    return Response({"error": "HTTP 403 Permission Denied"}, status=status.HTTP_403_FORBIDDEN)
-            except Chat.DoesNotExist:
-                return Response({"error": "chat is not found"}, status=status.HTTP_404_NOT_FOUND)
+        if request.data['message']:
+            serializer = MessageCreateSerializer(data=request.data)
+            if serializer.is_valid():
+                chat_id = serializer.validated_data['chat_id']
+                message = serializer.validated_data['message']
+                try:
+                    chat = Chat.objects.get(pk=chat_id)
+                    if chat in request.user.chat_set.all():
+                        Message.objects.create(author=request.user, chat=chat, message=message)
+                        return Response({"success": "message created"}, status=status.HTTP_201_CREATED)
+                    else:
+                        return Response({"error": "HTTP 403 Permission Denied"}, status=status.HTTP_403_FORBIDDEN)
+                except ObjectDoesNotExist:
+                    return Response({"error": "chat is not found"}, status=status.HTTP_404_NOT_FOUND)
+            else:
+                return Response(serializer.errors)
         else:
-            return Response(serializer.errors)
+            return Response(status=status.HTTP_204_NO_CONTENT)
 
     def destroy(self, request, *args, **kwargs):
         pk = self.kwargs['pk']
@@ -210,8 +214,8 @@ class MessageViewSet(mixins.CreateModelMixin,
             message = Message.objects.get(pk=pk)
             if message.author == request.user:
                 message.delete()
-                return Response({"success": "message deleted"})
+                return Response({"success": "message deleted"}, status=status.HTTP_204_NO_CONTENT)
             else:
                 return Response({"error": "HTTP 403 Permission Denied"}, status=status.HTTP_403_FORBIDDEN)
-        except Message.DoesNotExist:
+        except ObjectDoesNotExist:
             return Response({"error": "message is not found"}, status=status.HTTP_404_NOT_FOUND)
