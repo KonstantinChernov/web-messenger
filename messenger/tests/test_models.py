@@ -13,16 +13,16 @@ class ModelTest(TestCase):
         self.test_user2 = User.objects.create_user(username='test_user2', password='secret_password')
         self.test_user3 = User.objects.create_user(username='test_user3', password='secret_password')
 
-        self.chat_1 = Chat.objects.create()
+        self.chat_1 = Chat.objects.create(pk=1)
         self.test_user1.chat_set.add(self.chat_1)
         self.test_user2.chat_set.add(self.chat_1)
         for i in range(3):
-            Message.objects.create(author=self.test_user1, message=f'hello{i}', chat=self.chat_1)
+            Message.objects.create(pk=i+1, author=self.test_user1, message=f'hello{i}', chat=self.chat_1)
 
-        self.chat_2 = Chat.objects.create()
+        self.chat_2 = Chat.objects.create(pk=2)
         self.test_user1.chat_set.add(self.chat_2)
         self.test_user3.chat_set.add(self.chat_2)
-        self.message = Message.objects.create(author=self.test_user1, message='hello', chat=self.chat_2)
+        self.message = Message.objects.create(pk=4, author=self.test_user1, message='hello', chat=self.chat_2)
 
     def test_chat_type(self):
         self.assertEqual(self.chat_1.chat_type, 'D')

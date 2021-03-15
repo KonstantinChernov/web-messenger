@@ -64,7 +64,8 @@ def save_message_to_db_get_message_dict(json_message: dict) -> dict:
         'user': new_message.author.username,
         'timestamp': str(new_message.pub_date),
         'message_id': new_message.id
-    }
+        }
+
 
 
 def get_10_elder_messages(username: str, interlocutor: str, timestamp: str, amount: int = 10) -> list:

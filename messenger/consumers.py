@@ -3,8 +3,9 @@ import json
 from asgiref.sync import async_to_sync
 from channels.generic.websocket import WebsocketConsumer
 
-from .services.chat_services import save_message_to_db_get_message_dict, update_message_read, \
-    check_if_dialogue_is_empty_then_delete
+from .services.chat_services import (save_message_to_db_get_message_dict,
+                                     update_message_read,
+                                     check_if_dialogue_is_empty_then_delete)
 
 
 class ChatConsumer(WebsocketConsumer):

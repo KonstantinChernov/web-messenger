@@ -35,5 +35,4 @@ class Message(models.Model):
         ordering = ['pub_date']
 
     def __str__(self):
-        # return self.message
         return f'Message {self.pk} (chat: {self.chat}; author: {self.author}; published: {self.pub_date})'

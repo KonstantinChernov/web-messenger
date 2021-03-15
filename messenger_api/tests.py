@@ -21,18 +21,18 @@ class APITests(APITestCase):
         self.test_user3 = User.objects.create_user(username='test_user3', password='secret_password')
         self.test_user5 = User.objects.create_user(username='test_user5', password='secret_password')
 
-        self.chat_1 = Chat.objects.create()
+        self.chat_1 = Chat.objects.create(pk=1)
         self.test_user1.chat_set.add(self.chat_1)
         self.test_user2.chat_set.add(self.chat_1)
         for i in range(25):
-            Message.objects.create(author=self.test_user1, message=f'hello{i}', chat=self.chat_1)
+            Message.objects.create(pk=i+1, author=self.test_user1, message=f'hello{i}', chat=self.chat_1)
 
-        self.chat_2 = Chat.objects.create()
+        self.chat_2 = Chat.objects.create(pk=2)
         self.test_user1.chat_set.add(self.chat_2)
         self.test_user3.chat_set.add(self.chat_2)
-        Message.objects.create(author=self.test_user1, message='hello', chat=self.chat_2)
+        Message.objects.create(pk=26, author=self.test_user1, message='hello', chat=self.chat_2)
 
-        self.chat_3 = Chat.objects.create()
+        self.chat_3 = Chat.objects.create(pk=3)
         self.test_user2.chat_set.add(self.chat_3)
         self.test_user3.chat_set.add(self.chat_3)
 

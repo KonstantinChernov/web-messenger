@@ -1,0 +1,10 @@
+# Ignore
+.coverage
+.git
+.dockerignore
+.gitignore
+Dockerfile
+
+
+# Don't ignore
+!./requirements.txt
