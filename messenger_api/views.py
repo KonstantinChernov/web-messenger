@@ -189,7 +189,7 @@ class MessageViewSet(mixins.CreateModelMixin,
 
     def create(self, request, *args, **kwargs):
         if request.data['message']:
-            serializer = MessageCreateSerializer(data=request.data)
+            serializer = self.serializer_class(data=request.data)
             if serializer.is_valid():
                 chat_id = serializer.validated_data['chat_id']
                 message = serializer.validated_data['message']

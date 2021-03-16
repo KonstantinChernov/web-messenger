@@ -15,7 +15,6 @@ from pathlib import Path
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.1/howto/deployment/checklist/
 
@@ -30,6 +29,9 @@ DEBUG = int(os.environ.get("DEBUG", default=0))
 
 ALLOWED_HOSTS = os.environ.get("DJANGO_ALLOWED_HOSTS").split(" ")
 
+# SECRET_KEY = "2%!6b%c@q06fk%r#(4157&%(a@jive6c*i)xpe&c#2$h8zbg@6"
+# DEBUG = 1
+# DJANGO_ALLOWED_HOSTS = ['localhost']
 
 INSTALLED_APPS = [
     'channels',
@@ -46,7 +48,6 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
     'drf_yasg',
 ]
-
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -102,12 +103,11 @@ DATABASES = {
         'NAME': os.environ.get('SQL_DATABASE', default='postgres'),
         'USER': os.environ.get('SQL_USER', default='postgres'),
         'PASSWORD': os.environ.get('SQL_PASSWORD', default='postgres'),
-        'HOST': os.environ.get('SQL_HOST', default='localhost'),
-        'PORT': os.environ.get('SQL_PORT', default='localhost'),
+        'HOST': os.environ.get('SQL_HOST', default='postgres'),
+        'PORT': os.environ.get('SQL_PORT', default='5432'),
     }
 
 }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/3.1/ref/settings/#auth-password-validators
@@ -127,7 +127,6 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
 # Internationalization
 # https://docs.djangoproject.com/en/3.1/topics/i18n/
 
@@ -141,13 +140,11 @@ USE_L10N = True
 
 USE_TZ = True
 
-
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.1/howto/static-files/
 
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
-
 
 # LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = 'login'

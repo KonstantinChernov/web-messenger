@@ -1,10 +1,13 @@
 from django.urls import path
 from rest_framework import routers
 
-
 from .yasg import schema_view
 
-from .views import UsersViewSet, ChatsViewSet, MessageViewSet, UserRegisterAPIView, UserAuthTokenLogin
+from .views import (UsersViewSet,
+                    ChatsViewSet,
+                    MessageViewSet,
+                    UserRegisterAPIView,
+                    UserAuthTokenLogin)
 
 router = routers.SimpleRouter()
 router.register(r'users', UsersViewSet, basename='user')
